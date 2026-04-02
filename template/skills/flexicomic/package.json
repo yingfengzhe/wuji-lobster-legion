@@ -1,0 +1,34 @@
+{
+  "name": "flexicomic",
+  "version": "1.0.0",
+  "description": "Flexible comic generation with full customization support",
+  "type": "module",
+  "author": "SCF",
+  "license": "MIT",
+  "bin": {
+    "flexicomic": "./scripts/main.ts"
+  },
+  "scripts": {
+    "init": "bun scripts/main.ts init",
+    "generate": "bun scripts/main.ts generate",
+    "preview": "bun scripts/main.ts preview",
+    "composite": "bun scripts/main.ts composite"
+  },
+  "keywords": [
+    "comic",
+    "manga",
+    "generation",
+    "ai",
+    "image-generation"
+  ],
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.89"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "bun-types": "latest"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "flexicomic",
+  "owner": {
+    "name": "SCF",
+    "email": ""
+  },
+  "metadata": {
+    "description": "Flexible comic/manga generation with full customization support",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "flexicomic-skill",
+      "description": "Flexible comic generation tool",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./"
+      ]
+    }
+  ]
+}

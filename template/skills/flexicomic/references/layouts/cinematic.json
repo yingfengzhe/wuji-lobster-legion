@@ -1,0 +1,42 @@
+{
+  "type": "cinematic",
+  "description": "Cinematic layout with wide top panel and smaller bottom panels",
+  "grid": {
+    "rows": 3,
+    "cols": 2,
+    "gutter": 10
+  },
+  "panels": [
+    {
+      "id": "p1-1",
+      "position": { "row": 0, "col": 0 },
+      "rowspan": 1,
+      "colspan": 2,
+      "description": "Wide establishing shot"
+    },
+    {
+      "id": "p1-2",
+      "position": { "row": 1, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-3",
+      "position": { "row": 1, "col": 1 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-4",
+      "position": { "row": 2, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-5",
+      "position": { "row": 2, "col": 1 },
+      "rowspan": 1,
+      "colspan": 1
+    }
+  ]
+}

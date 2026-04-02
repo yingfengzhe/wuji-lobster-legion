@@ -1,0 +1,111 @@
+{
+  "_comment": "Example 2-character IPAdapter workflow. Each IPAdapterAdvanced chains from the previous model output.",
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 2.0,
+      "sampler_name": "dpmpp_sde",
+      "scheduler": "karras",
+      "denoise": 1.0,
+      "model": ["31", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "dreamshaperXL_turboDPMSDE.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 768,
+      "height": 768,
+      "batch_size": 1
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "medium shot, eye level view, comic book art style, two people arguing in a coffee shop, warm interior lighting, comic panel, high quality, detailed",
+      "clip": ["4", 1]
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "bad quality, worst quality, text, watermark, blurry, deformed",
+      "clip": ["4", 1]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["3", 0],
+      "vae": ["4", 2]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "panel_multi_ipadapter",
+      "images": ["8", 0]
+    }
+  },
+  "11": {
+    "class_type": "IPAdapterUnifiedLoader",
+    "inputs": {
+      "model": ["4", 0],
+      "preset": "PLUS (high strength)"
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "charref_character_a.png"
+    },
+    "_comment": "Character A reference image"
+  },
+  "30": {
+    "class_type": "IPAdapterAdvanced",
+    "inputs": {
+      "model": ["11", 0],
+      "ipadapter": ["11", 1],
+      "image": ["20", 0],
+      "weight": 0.6,
+      "weight_type": "style transfer",
+      "combine_embeds": "concat",
+      "start_at": 0.0,
+      "end_at": 0.8,
+      "embeds_scaling": "V only"
+    },
+    "_comment": "Character A (primary) — model from IPAdapterUnifiedLoader"
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "charref_character_b.png"
+    },
+    "_comment": "Character B reference image"
+  },
+  "31": {
+    "class_type": "IPAdapterAdvanced",
+    "inputs": {
+      "model": ["30", 0],
+      "ipadapter": ["11", 1],
+      "image": ["21", 0],
+      "weight": 0.4,
+      "weight_type": "style transfer",
+      "combine_embeds": "concat",
+      "start_at": 0.0,
+      "end_at": 0.7,
+      "embeds_scaling": "V only"
+    },
+    "_comment": "Character B (secondary) — model chains from Character A's IPAdapterAdvanced"
+  }
+}

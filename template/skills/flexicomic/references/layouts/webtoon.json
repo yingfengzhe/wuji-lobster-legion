@@ -1,0 +1,35 @@
+{
+  "type": "webtoon",
+  "description": "Vertical scrolling webtoon format with single column",
+  "grid": {
+    "rows": 4,
+    "cols": 1,
+    "gutter": 5
+  },
+  "panels": [
+    {
+      "id": "p1-1",
+      "position": { "row": 0, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-2",
+      "position": { "row": 1, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-3",
+      "position": { "row": 2, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-4",
+      "position": { "row": 3, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    }
+  ]
+}

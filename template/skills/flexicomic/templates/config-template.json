@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "title": "My Comic",
+    "author": "Author Name",
+    "version": "1.0.0"
+  },
+  "style": {
+    "artStyle": "manga",
+    "tone": "warm",
+    "basePrompt": "Japanese manga style, warm golden lighting, nostalgic atmosphere"
+  },
+  "pageSettings": {
+    "aspectRatio": "3:4",
+    "dpi": 300,
+    "outputFormat": "png"
+  },
+  "characters": [
+    {
+      "id": "char1",
+      "name": "Protagonist",
+      "role": "protagonist",
+      "description": "A young brave hero on a journey",
+      "visualSpec": {
+        "age": "18-20 years old",
+        "hair": "black short hair",
+        "eyes": "large brown eyes",
+        "outfit": "blue jacket with white shirt"
+      },
+      "expressions": ["neutral", "happy", "sad", "angry"],
+      "angles": ["front", "3q", "profile", "back"]
+    }
+  ],
+  "pages": [
+    {
+      "id": "page1",
+      "title": "Chapter 1: The Beginning",
+      "layout": {
+        "type": "custom",
+        "grid": {
+          "rows": 2,
+          "cols": 2,
+          "gutter": 10
+        },
+        "panels": [
+          {
+            "id": "p1-1",
+            "position": { "row": 0, "col": 0 },
+            "rowspan": 1,
+            "colspan": 2,
+            "sizeRatio": 0.4,
+            "prompt": "Peaceful village at dawn, traditional Japanese houses, mountain in background",
+            "characters": [],
+            "focus": "environment"
+          },
+          {
+            "id": "p1-2",
+            "position": { "row": 1, "col": 0 },
+            "rowspan": 1,
+            "colspan": 1,
+            "sizeRatio": 0.3,
+            "prompt": "Close up of protagonist waking up, stretching arms, morning light through window",
+            "characters": [
+              {
+                "id": "char1",
+                "expression": "neutral",
+                "angle": "front",
+                "action": "waking up and stretching"
+              }
+            ],
+            "focus": "character"
+          },
+          {
+            "id": "p1-3",
+            "position": { "row": 1, "col": 1 },
+            "rowspan": 1,
+            "colspan": 1,
+            "sizeRatio": 0.3,
+            "prompt": "Protagonist looking out window with worried expression, seeing smoke in distance",
+            "characters": [
+              {
+                "id": "char1",
+                "expression": "worried",
+                "angle": "3q"
+              }
+            ],
+            "focus": "character"
+          }
+        ]
+      }
+    }
+  ]
+}

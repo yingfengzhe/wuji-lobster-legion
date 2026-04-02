@@ -1,0 +1,35 @@
+{
+  "type": "2x2-grid",
+  "description": "Equal 2x2 grid layout with four panels of equal size",
+  "grid": {
+    "rows": 2,
+    "cols": 2,
+    "gutter": 10
+  },
+  "panels": [
+    {
+      "id": "p1-1",
+      "position": { "row": 0, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-2",
+      "position": { "row": 0, "col": 1 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-3",
+      "position": { "row": 1, "col": 0 },
+      "rowspan": 1,
+      "colspan": 1
+    },
+    {
+      "id": "p1-4",
+      "position": { "row": 1, "col": 1 },
+      "rowspan": 1,
+      "colspan": 1
+    }
+  ]
+}
