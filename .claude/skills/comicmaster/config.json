@@ -1,0 +1,27 @@
+{
+  "defaults": {
+    "preset": "dreamshaperXL",
+    "style": "western",
+    "reading_direction": "ltr",
+    "panel_width": 768,
+    "panel_height": 768,
+    "page_width": 2480,
+    "page_height": 3508,
+    "page_dpi": 300,
+    "max_retries": 3,
+    "generation_timeout": 300
+  },
+  "bubbles": {
+    "default_font_set": "western",
+    "outline_width": 3,
+    "padding_ratio": 0.15
+  },
+  "layout": {
+    "margin": [80, 80, 60, 60],
+    "gutter": 30,
+    "border_width": 3
+  },
+  "output": {
+    "base_dir": "/home/mcmuff/clawd/output/comicmaster"
+  }
+}

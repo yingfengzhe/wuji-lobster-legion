@@ -1,0 +1,67 @@
+{
+  "_comment": "Illustrious XL panel workflow. Uses Danbooru-tag prompts and 1024x1024 default. For NoobAI-XL v-pred, add ModelSamplingDiscrete node between checkpoint and KSampler.",
+  "3": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 42,
+      "steps": 28,
+      "cfg": 5.5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1.0,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "Illustrious-XL-v0.1.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "EmptyLatentImage",
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "masterpiece, best quality, absurdres, highres, 1boy, cowboy shot, straight-on, short black hair, brown eyes, grey hoodie, standing, rooftop, ruined city, dawn, dramatic lighting, comic, western comic, bold outlines",
+      "clip": ["10", 0]
+    }
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "worst quality, low quality, normal quality, lowres, bad anatomy, bad hands, extra fingers, fewer fingers, missing fingers, extra limbs, malformed limbs, mutated hands, fused fingers, text, watermark, signature, username, logo, blurry, jpeg artifacts, cropped, duplicate, error",
+      "clip": ["10", 0]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["3", 0],
+      "vae": ["4", 2]
+    }
+  },
+  "9": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "panel_illustrious",
+      "images": ["8", 0]
+    }
+  },
+  "10": {
+    "class_type": "CLIPSetLastLayer",
+    "inputs": {
+      "stop_at_clip_layer": -2,
+      "clip": ["4", 1]
+    }
+  }
+}

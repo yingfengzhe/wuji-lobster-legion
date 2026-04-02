@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Flexicomic Configuration Schema",
+  "type": "object",
+  "required": ["meta", "style", "pageSettings", "characters", "pages"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Comic metadata",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "description": "Comic title" },
+        "author": { "type": "string", "description": "Author name" },
+        "version": { "type": "string", "description": "Configuration version" }
+      }
+    },
+    "style": {
+      "type": "object",
+      "description": "Art style configuration",
+      "required": ["artStyle", "tone"],
+      "properties": {
+        "artStyle": {
+          "type": "string",
+          "enum": ["manga", "ligne-claire", "realistic", "ink-brush", "chalk"],
+          "description": "Primary art style"
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["neutral", "warm", "dramatic", "romantic", "energetic", "vintage", "action"],
+          "description": "Color tone and mood"
+        },
+        "basePrompt": { "type": "string", "description": "Base style prompt" }
+      }
+    },
+    "pageSettings": {
+      "type": "object",
+      "description": "Page output settings",
+      "required": ["aspectRatio"],
+      "properties": {
+        "aspectRatio": { "type": "string", "description": "Page aspect ratio (e.g., 3:4, 16:9)" },
+        "dpi": { "type": "number", "default": 300, "description": "Output DPI" },
+        "outputFormat": {
+          "type": "string",
+          "enum": ["png", "jpg", "jpeg"],
+          "default": "png",
+          "description": "Output image format"
+        },
+        "width": { "type": "number", "description": "Page width in pixels (overrides aspectRatio)" },
+        "height": { "type": "number", "description": "Page height in pixels (overrides aspectRatio)" }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "description": "Character definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "role"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique character ID" },
+          "name": { "type": "string", "description": "Character name" },
+          "role": {
+            "type": "string",
+            "enum": ["protagonist", "antagonist", "supporting", "background"],
+            "description": "Character role"
+          },
+          "description": { "type": "string", "description": "Character description" },
+          "visualSpec": {
+            "type": "object",
+            "description": "Visual specifications",
+            "properties": {
+              "age": { "type": "string", "description": "Age range" },
+              "hair": { "type": "string", "description": "Hair description" },
+              "eyes": { "type": "string", "description": "Eye description" },
+              "outfit": { "type": "string", "description": "Clothing description" },
+              "bodyType": { "type": "string", "description": "Body type" },
+              "distinctiveFeatures": { "type": "string", "description": "Distinctive features" }
+            }
+          },
+          "expressions": {
+            "type": "array",
+            "description": "Expression variations for reference",
+            "items": { "type": "string" },
+            "default": ["neutral", "happy", "sad", "angry"]
+          },
+          "angles": {
+            "type": "array",
+            "description": "Camera angles for reference",
+            "items": { "type": "string" },
+            "default": ["front", "3q", "profile", "back"]
+          }
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "description": "Page definitions",
+      "items": {
+        "type": "object",
+        "required": ["id", "layout"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique page ID" },
+          "title": { "type": "string", "description": "Page title" },
+          "layout": {
+            "type": "object",
+            "description": "Page layout configuration",
+            "required": ["type", "panels"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["custom", "2x2-grid", "cinematic", "webtoon", "dense", "splash"],
+                "description": "Layout type"
+              },
+              "grid": {
+                "type": "object",
+                "description": "Grid settings (for custom layouts)",
+                "properties": {
+                  "rows": { "type": "number", "minimum": 1 },
+                  "cols": { "type": "number", "minimum": 1 },
+                  "gutter": { "type": "number", "default": 10, "description": "Gutter size in pixels" }
+                }
+              },
+              "panels": {
+                "type": "array",
+                "description": "Panel definitions",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "position", "prompt"],
+                  "properties": {
+                    "id": { "type": "string", "description": "Unique panel ID" },
+                    "position": {
+                      "type": "object",
+                      "description": "Grid position",
+                      "properties": {
+                        "row": { "type": "number", "minimum": 0 },
+                        "col": { "type": "number", "minimum": 0 }
+                      },
+                      "required": ["row", "col"]
+                    },
+                    "rowspan": { "type": "number", "default": 1, "minimum": 1, "description": "Number of rows to span" },
+                    "colspan": { "type": "number", "default": 1, "minimum": 1, "description": "Number of columns to span" },
+                    "sizeRatio": { "type": "number", "minimum": 0, "maximum": 1, "description": "Relative size (0-1)" },
+                    "prompt": { "type": "string", "description": "Panel content prompt" },
+                    "characters": {
+                      "type": "array",
+                      "description": "Characters in this panel",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "description": "Character ID reference" },
+                          "expression": { "type": "string", "description": "Character expression" },
+                          "angle": { "type": "string", "description": "Camera angle" },
+                          "action": { "type": "string", "description": "Character action" }
+                        }
+                      }
+                    },
+                    "focus": {
+                      "type": "string",
+                      "enum": ["character", "environment", "action", "dialogue", "close-up", "wide"],
+                      "description": "Panel focus type"
+                    },
+                    "aspectRatio": { "type": "string", "description": "Custom aspect ratio for this panel" },
+                    "notes": { "type": "string", "description": "Additional notes" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微短剧剧本生成器</title>
+    <style>
+        /* 基础样式 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border: none;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .close {
+            color: #718096;
+            float: right;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .close:hover {
+            color: #2d3748;
+            background-color: #f7fafc;
+        }
+
+        /* 主界面样式 */
+        #app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 20px;
+        }
+
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            object-fit: contain;
+            background-color: white;
+        }
+
+        .university-logo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #shanghai-university-logo {
+            background-color: #e7f3ff;
+            color: #1976d2;
+        }
+
+        #shanghai-university-literature-logo {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+
+        .header-content {
+            text-align: left;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* 设置按钮 */
+        #settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        #settings-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* 主要内容区域 */
+        #main-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 输入区域 */
+        #input-section,
+        #custom-requirements-section {
+            margin-bottom: 25px;
+        }
+
+        #input-section h2,
+        #custom-requirements-section h2,
+        #params-section h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #novel-content,
+        #custom-requirements {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            resize: vertical;
+            min-height: 200px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        #novel-content:focus,
+        #custom-requirements:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 参数设置 */
+        #params-section {
+            margin-bottom: 25px;
+            background-color: #f7fafc;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .param-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .param-group label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .param-group input,
+        .param-group select {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: #2d3748;
+        }
+
+        .param-group input:focus,
+        .param-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #temperature {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        #temperature::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #temperature::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 6px rgba(102, 126, 234, 0.15);
+        }
+
+        #temperature-value {
+            min-width: 40px;
+            text-align: right;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        /* 操作按钮 */
+        #action-section {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        /* 进度显示 */
+        #progress-section {
+            margin-bottom: 25px;
+            display: none;
+            padding: 20px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
+
+        #progress-text {
+            color: #4a5568;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* 结果区域 */
+        #result-section {
+            display: none;
+            margin-top: 30px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        #result-section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        #script-output {
+            background-color: #f7fafc;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        /* 下载区域 */
+        #download-section {
+            margin-top: 25px;
+            padding: 25px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        #download-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .logo-container {
+                margin-right: 0;
+            }
+            
+            .header-content {
+                text-align: center;
+            }
+            
+            .params-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            #action-section {
+                flex-direction: column;
+            }
+            
+            .download-buttons {
+                flex-direction: column;
+            }
+            
+            #settings-btn {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 16px;
+            }
+            
+            #main-content {
+                padding: 20px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 成功/错误消息 */
+        .message {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- 设置按钮 -->
+    <button id="settings-btn" title="设置API密钥">⚙️</button>
+
+    <!-- API密钥输入模态框 -->
+    <div id="api-key-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>设置API密钥</h2>
+            <div id="api-key-message" class="message" style="display: none;"></div>
+            <p>请输入您的硅基流动API密钥：</p>
+            <input type="password" id="api-key-input" placeholder="输入API密钥" style="width: 100%; margin-bottom: 15px; padding: 10px; font-size: 16px;">
+            <div style="display: flex; gap: 10px;">
+                <button id="save-api-key" class="btn btn-primary" style="flex: 1;">保存</button>
+                <button id="test-api-key" class="btn btn-secondary" style="flex: 1;">测试连接</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 应用容器 -->
+    <div id="app-container">
+        <header>
+            <div class="logo-container">
+                <img 
+                    src="SHU.jpg" 
+                    id="shanghai-university-logo" 
+                    class="university-logo" 
+                    alt="上海大学LOGO"
+                    style="width: 60px; height: 60px; object-fit: contain;"
+                >
+                <img 
+                    src="SHUCLA.jpg" 
+                    id="shanghai-university-literature-logo" 
+                    class="university-logo" 
+                    alt="上海大学文学院LOGO"
+                    style="width: 60px; height: 60px; object-fit: contain;"
+                >
+            </div>
+            <div class="header-content">
+                <h1>📝 微短剧剧本生成器</h1>
+                <p class="subtitle">将网络文学轻松转化为高质量微短剧剧本</p>
+            </div>
+        </header>
+
+        <main id="main-content">
+            <!-- 输入区域 -->
+            <section id="input-section">
+                <h2>📄 网络文学内容</h2>
+                <textarea 
+                    id="novel-content" 
+                    placeholder="请输入或粘贴网络文学内容...\n\n示例：林晓是一名年轻的设计师，每天忙碌于工作。一天，她在上班的路上不小心撞到了一个陌生男人，没想到这个男人竟然是她新公司的CEO陈阳。两人的命运从此交织在一起..."
+                ></textarea>
+            </section>
+            
+            <!-- 个性化要求区域 -->
+            <section id="custom-requirements-section">
+                <h2>🎨 个性化要求</h2>
+                <textarea 
+                    id="custom-requirements" 
+                    placeholder="请输入您对剧本的个性化要求...\n\n示例：\n1. 主题：突出职场女性的成长与独立\n2. 情节：增加更多的职场冲突和挑战\n3. 悬念：在第3集揭示陈阳的隐藏身份\n4. 情感：加强林晓和陈阳之间的情感张力\n5. 艺术手法：使用更多的闪回镜头展现人物过去\n6. 其他：添加一只可爱的宠物猫作为配角"
+                    rows="6"
+                ></textarea>
+                <small>系统将根据您的要求自动调整剧本生成，支持主题、情节、悬念、情感、艺术手法等方面的个性化设置</small>
+            </section>
+
+            <!-- 参数设置 -->
+            <section id="params-section">
+                <h2>⚙️ 生成参数</h2>
+                <div class="params-grid">
+                    <div class="param-group">
+                        <label for="genre">题材类型：</label>
+                        <select id="genre" disabled>
+                            <option value="自动识别" selected>自动识别</option>
+                            <option value="甜宠">甜宠</option>
+                            <option value="悬疑">悬疑</option>
+                            <option value="都市">都市</option>
+                            <option value="古装">古装</option>
+                            <option value="奇幻">奇幻</option>
+                            <option value="科幻">科幻</option>
+                            <option value="青春">青春</option>
+                            <option value="职场">职场</option>
+                        </select>
+                        <small>系统将根据输入内容自动识别题材类型</small>
+                    </div>
+                    <div class="param-group">
+                        <label for="episodes">集数：</label>
+                        <input type="number" id="episodes" min="1" max="24" value="1">
+                        <small>设置生成的剧本集数，1-24集</small>
+                    </div>
+                    <div class="param-group">
+                        <label for="duration">每集时长（分钟）：</label>
+                        <input type="number" id="duration" min="5" max="30" value="10">
+                        <small>影响剧本的内容量和节奏，5-30分钟</small>
+                    </div>
+                    <div class="param-group">
+                        <label for="temperature">创意度：</label>
+                        <div class="slider-container">
+                            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                            <span id="temperature-value">0.7</span>
+                        </div>
+                        <small>控制剧本的创意程度，0=保守，1=创新</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 操作按钮 -->
+            <section id="action-section">
+                <button id="generate-btn" class="btn btn-primary">
+                    <span id="generate-btn-text">生成剧本</span>
+                    <span id="generate-loading" class="loading" style="display: none;"></span>
+                </button>
+                <button id="clear-btn" class="btn btn-secondary">清空内容</button>
+                <button id="load-example-btn" class="btn btn-secondary">加载示例</button>
+            </section>
+
+            <!-- 进度显示 -->
+            <section id="progress-section">
+                <div id="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+                <div id="progress-text">正在生成剧本... 0%</div>
+            </section>
+        </main>
+
+        <!-- 结果区域 -->
+        <section id="result-section">
+            <h2>📋 生成结果</h2>
+            <div id="script-output"></div>
+
+            <!-- 下载区域 -->
+            <div id="download-section">
+                <h3>💾 下载剧本</h3>
+                <div class="download-buttons">
+                    <button id="download-txt" class="download-btn">
+                        📄 纯文本格式
+                    </button>
+                    <button id="download-word" class="download-btn">
+                        📝 Word格式
+                    </button>
+                    <button id="download-pdf" class="download-btn">
+                        📄 PDF格式
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2026 微短剧剧本生成器 | 基于硅基流动API</p>
+        </footer>
+    </div>
+
+    <script>
+        // 模态框相关元素
+        const modal = document.getElementById('api-key-modal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        const settingsBtn = document.getElementById('settings-btn');
+        const saveApiKeyBtn = document.getElementById('save-api-key');
+        const testApiKeyBtn = document.getElementById('test-api-key');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const apiKeyMessage = document.getElementById('api-key-message');
+
+        // 主要功能元素
+        const novelContent = document.getElementById('novel-content');
+        const customRequirements = document.getElementById('custom-requirements');
+        const generateBtn = document.getElementById('generate-btn');
+        const generateBtnText = document.getElementById('generate-btn-text');
+        const generateLoading = document.getElementById('generate-loading');
+        const clearBtn = document.getElementById('clear-btn');
+        const loadExampleBtn = document.getElementById('load-example-btn');
+        const progressSection = document.getElementById('progress-section');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const resultSection = document.getElementById('result-section');
+        const scriptOutput = document.getElementById('script-output');
+        const downloadTxtBtn = document.getElementById('download-txt');
+        const downloadWordBtn = document.getElementById('download-word');
+        const downloadPdfBtn = document.getElementById('download-pdf');
+
+        // 参数元素
+        const genreSelect = document.getElementById('genre');
+        const episodesInput = document.getElementById('episodes');
+        const durationInput = document.getElementById('duration');
+        const temperatureSlider = document.getElementById('temperature');
+        const temperatureValue = document.getElementById('temperature-value');
+
+        // 全局变量
+        let generatedScript = '';
+
+        // 打开API密钥模态框
+        function openApiKeyModal() {
+            modal.style.display = 'block';
+            // 填充已保存的API密钥
+            const savedApiKey = localStorage.getItem('siliconFlowApiKey');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+        }
+
+        // 关闭模态框
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            clearApiKeyMessage();
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+                clearApiKeyMessage();
+            }
+        }
+
+        // 清空API密钥消息
+        function clearApiKeyMessage() {
+            apiKeyMessage.style.display = 'none';
+            apiKeyMessage.textContent = '';
+            apiKeyMessage.className = 'message';
+        }
+
+        // 显示API密钥消息
+        function showApiKeyMessage(text, type) {
+            apiKeyMessage.textContent = text;
+            apiKeyMessage.className = `message ${type}`;
+            apiKeyMessage.style.display = 'block';
+        }
+
+        // 保存API密钥
+        saveApiKeyBtn.onclick = function() {
+            const apiKey = apiKeyInput.value.trim();
+            if (apiKey) {
+                localStorage.setItem('siliconFlowApiKey', apiKey);
+                showApiKeyMessage('API密钥已保存！', 'success');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    clearApiKeyMessage();
+                }, 1500);
+            } else {
+                showApiKeyMessage('请输入有效的API密钥！', 'error');
+            }
+        }
+
+        // 测试API连接
+        testApiKeyBtn.onclick = async function() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                showApiKeyMessage('请先输入API密钥！', 'error');
+                return;
+            }
+
+            testApiKeyBtn.innerHTML = '<span class="loading"></span> 测试中...';
+            testApiKeyBtn.disabled = true;
+            clearApiKeyMessage();
+
+            try {
+                console.log('开始测试API连接...');
+                
+                // 先进行简单的网络连接测试
+                if (!navigator.onLine) {
+                    throw new Error('网络连接失败，请检查您的网络设置');
+                }
+                
+                console.log('网络连接正常，开始测试API...');
+                
+                // 调用一个简单的API端点来测试连接
+                const testPrompt = "你好，这是一个API连接测试。请返回'API连接测试成功！'。";
+                const response = await callSiliconFlowAPI(apiKey, testPrompt, 0.1, 100);
+                
+                console.log('API测试成功，响应内容:', response);
+                
+                if (response.indexOf('API连接测试成功') !== -1) {
+                    showApiKeyMessage('API连接测试成功！', 'success');
+                } else {
+                    showApiKeyMessage('API连接测试成功，但返回内容不符合预期。\n\n返回内容：' + response.substring(0, 100) + '...', 'success');
+                }
+            } catch (error) {
+                console.error('API测试失败:', error);
+                console.error('错误名称:', error.name);
+                console.error('错误堆栈:', error.stack);
+                
+                // 显示更详细的错误信息
+                let detailedMessage = `API连接测试失败！\n\n错误类型：${error.name}\n详细错误：${error.message}`;
+                
+                // 添加额外的调试信息
+                if (error.message.indexOf('fetch') !== -1) {
+                    detailedMessage += '\n\n可能的原因：\n1. 网络连接问题\n2. 防火墙阻止了API请求\n3. 硅基流动API服务不可用\n4. API URL配置错误';
+                } else if (error.message.indexOf('invalid_api_key') !== -1) {
+                    detailedMessage += '\n\n可能的原因：\n1. API密钥错误或已过期\n2. API密钥格式不正确\n3. 密钥包含多余的空格或字符';
+                } else if (error.message.indexOf('rate_limit') !== -1) {
+                    detailedMessage += '\n\n可能的原因：\n1. API调用次数已达上限\n2. 请稍后再试';
+                } else if (error.message.indexOf('model_not_found') !== -1) {
+                    detailedMessage += '\n\n可能的原因：\n1. 请求的模型不可用\n2. 模型名称配置错误';
+                }
+                
+                showApiKeyMessage(detailedMessage, 'error');
+            } finally {
+                testApiKeyBtn.innerHTML = '测试连接';
+                testApiKeyBtn.disabled = false;
+            }
+        }
+
+        // 设置按钮点击事件
+        settingsBtn.onclick = openApiKeyModal;
+
+        // 创意度滑块变化
+        temperatureSlider.oninput = function() {
+            temperatureValue.textContent = this.value;
+        }
+
+        // 清空内容
+        clearBtn.onclick = function() {
+            novelContent.value = '';
+            resultSection.style.display = 'none';
+            progressSection.style.display = 'none';
+        }
+
+        // 加载示例
+        loadExampleBtn.onclick = function() {
+            const exampleContent = `林晓是一名年轻的设计师，每天忙碌于工作。一天，她在上班的路上不小心撞到了一个陌生男人，没想到这个男人竟然是她新公司的CEO陈阳。
+
+陈阳是业内知名的创业公司CEO，年轻有为但性格冷漠。这次意外的碰撞让两人的命运从此交织在一起。林晓进入新公司后，发现陈阳对她格外关注，而她也在工作中逐渐发现了陈阳不为人知的温柔一面。
+
+随着时间的推移，两人之间的关系越来越微妙。林晓开始怀疑陈阳是否对她有特殊的感情，而陈阳也在不知不觉中被林晓的善良和才华所吸引。然而，就在两人感情升温之际，一个隐藏已久的秘密被揭开，威胁着他们之间的关系...`;
+            novelContent.value = exampleContent;
+        }
+
+        // 自动识别题材类型
+        function autoDetectGenre(content) {
+            // 简单的题材类型识别逻辑
+            const genreKeywords = {
+                '甜宠': ['爱情', '喜欢', '甜蜜', '宠', '恋爱', '浪漫', 'CP'],
+                '悬疑': ['悬疑', '推理', '破案', '侦探', '谜', '真相', '秘密', '线索'],
+                '都市': ['都市', '职场', '办公室', '公司', '上班', '职场', '白领'],
+                '古装': ['古代', '古装', '皇帝', '公主', '将军', '宫廷', '古代', '朝代', '汉服'],
+                '奇幻': ['奇幻', '魔法', '魔法', '精灵', '妖怪', '法术', '修仙', '修真', '玄幻'],
+                '科幻': ['科幻', '未来', '科技', '机器人', '太空', '宇宙', '星球', 'AI', '人工智能'],
+                '青春': ['青春', '校园', '学生', '大学', '高中', '青春', '毕业', '校服'],
+                '职场': ['职场', '工作', '办公室', '公司', '职业', '上班', '职场', '升职', '同事']
+            };
+            
+            // 转换为小写，便于匹配
+            const lowerContent = content.toLowerCase();
+            
+            // 统计每个题材的关键词出现次数
+            let maxCount = 0;
+            let detectedGenre = '自动识别';
+            
+            for (const [genre, keywords] of Object.entries(genreKeywords)) {
+                let count = 0;
+                for (const keyword of keywords) {
+                    if (lowerContent.includes(keyword.toLowerCase())) {
+                        count++;
+                    }
+                }
+                if (count > maxCount) {
+                    maxCount = count;
+                    detectedGenre = genre;
+                }
+            }
+            
+            return detectedGenre;
+        }
+
+        // 生成剧本
+        generateBtn.onclick = async function() {
+            const content = novelContent.value.trim();
+            if (!content) {
+                alert('请输入网络文学内容！');
+                return;
+            }
+
+            const apiKey = localStorage.getItem('siliconFlowApiKey');
+            if (!apiKey) {
+                alert('请先设置API密钥！');
+                openApiKeyModal();
+                return;
+            }
+
+            // 显示加载状态
+            generateBtn.disabled = true;
+            generateBtnText.textContent = '生成中...';
+            generateLoading.style.display = 'inline-block';
+            progressSection.style.display = 'block';
+            resultSection.style.display = 'none';
+
+            // 重置进度
+            progressFill.style.width = '0%';
+            progressText.textContent = '正在生成剧本... 0%';
+
+            // 自动识别题材类型
+            const detectedGenre = autoDetectGenre(content);
+            console.log('自动识别的题材类型:', detectedGenre);
+            
+            // 获取参数
+            const params = {
+                genre: detectedGenre,
+                episodes: parseInt(document.getElementById('episodes').value),
+                duration: parseInt(document.getElementById('duration').value),
+                temperature: parseFloat(document.getElementById('temperature').value)
+            };
+
+            try {
+                // 调用硅基流动API生成剧本
+                await generateScriptWithAPI(content, params, apiKey);
+                
+                // 生成完成
+                generateBtn.disabled = false;
+                generateBtnText.textContent = '生成剧本';
+                generateLoading.style.display = 'none';
+                
+                // 显示结果
+                resultSection.style.display = 'block';
+                scriptOutput.textContent = generatedScript;
+                
+                // 滚动到结果区域
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('API生成失败，尝试使用本地生成模式:', error);
+                
+                try {
+                    // API调用失败，使用本地示例生成逻辑作为降级方案
+                    generatedScript = generateExampleScript(params);
+                    
+                    // 生成完成
+                    generateBtn.disabled = false;
+                    generateBtnText.textContent = '生成剧本';
+                    generateLoading.style.display = 'none';
+                    
+                    // 显示结果和警告信息
+                    resultSection.style.display = 'block';
+                    scriptOutput.textContent = `⚠️ 注意：由于API调用失败，已使用本地示例生成模式\n\n${generatedScript}`;
+                    
+                    // 滚动到结果区域
+                    resultSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // 显示详细错误信息
+                    alert(`API调用失败，已使用本地生成模式。\n详细错误：${error.message}\n\n建议：\n1. 检查API密钥是否正确\n2. 检查网络连接\n3. 稍后重试\n4. 或继续使用本地生成的示例剧本`);
+                } catch (fallbackError) {
+                    // 本地生成也失败
+                    console.error('本地生成也失败:', fallbackError);
+                    generateBtn.disabled = false;
+                    generateBtnText.textContent = '生成剧本';
+                    generateLoading.style.display = 'none';
+                    progressSection.style.display = 'none';
+                    alert(`剧本生成失败！\n\n详细错误：${error.message}\n\n建议：\n1. 检查API密钥是否正确\n2. 检查网络连接\n3. 稍后重试`);
+                }
+            }
+        }
+        
+        // 使用硅基流动API生成剧本
+        async function generateScriptWithAPI(content, params, apiKey) {
+            return new Promise(async (resolve, reject) => {
+                let progress = 0;
+                let intervalId = null;
+                
+                // 开始进度更新
+                intervalId = setInterval(() => {
+                    progress += 5;
+                    if (progress > 95) progress = 95; // 最大95%，留5%给实际完成
+                    progressFill.style.width = progress + '%';
+                    
+                    // 更新进度文本
+                    let statusText = '正在生成剧本...';
+                    if (progress < 20) {
+                        statusText = '正在分析文学IP...';
+                    } else if (progress < 40) {
+                        statusText = '正在设计微短剧叙事...';
+                    } else if (progress < 60) {
+                        statusText = '正在进行影视化转换...';
+                    } else if (progress < 80) {
+                        statusText = '正在塑造人物形象...';
+                    } else {
+                        statusText = '正在优化剧本...';
+                    }
+                    progressText.textContent = `${statusText} ${progress}%`;
+                }, 150);
+                
+                try {
+                    console.log('开始调用API生成剧本...');
+                    console.log('参数:', params);
+                    
+                    // 获取用户的个性化要求
+                    const customRequirements = document.getElementById('custom-requirements').value.trim();
+                    
+                    // 构建提示词
+                    const prompt = buildPrompt(content, params, customRequirements);
+                    console.log('提示词长度:', prompt.length);
+                    
+                    // 调用硅基流动API
+                    const response = await callSiliconFlowAPI(apiKey, prompt, params.temperature);
+                    console.log('API调用成功，开始解析响应...');
+                    
+                    // 解析响应
+                    generatedScript = response;
+                    console.log('剧本生成成功，长度:', generatedScript.length);
+                    
+                    // 完成进度
+                    clearInterval(intervalId);
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '剧本生成完成！';
+                    
+                    resolve();
+                } catch (error) {
+                    console.error('API生成失败:', error);
+                    if (intervalId) {
+                        clearInterval(intervalId);
+                    }
+                    reject(error);
+                }
+            });
+        }
+        
+        // 解析用户的个性化要求
+        function parseCustomRequirements(requirements) {
+            // 确保requirements是字符串
+            if (typeof requirements !== 'string') {
+                requirements = String(requirements || '');
+            }
+            
+            if (!requirements || requirements.trim() === '') {
+                return '';
+            }
+            
+            // 识别要求类型
+            const requirementTypes = {
+                '主题': [],
+                '情节': [],
+                '悬念': [],
+                '情感': [],
+                '艺术手法': [],
+                '其他': []
+            };
+            
+            // 按行分割要求
+            const lines = requirements.split('\n');
+            
+            // 遍历每一行，识别要求类型
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) continue;
+                
+                let matched = false;
+                
+                // 检查是否包含类型关键词
+                for (const type of Object.keys(requirementTypes)) {
+                    if (trimmedLine.indexOf(type) !== -1) {
+                        // 提取要求内容
+                        const content = trimmedLine.replace(new RegExp(`${type}[：:]?`), '').trim();
+                        if (content) {
+                            requirementTypes[type].push(content);
+                        }
+                        matched = true;
+                        break;
+                    }
+                }
+                
+                // 如果没有匹配到类型，作为其他要求
+                if (!matched) {
+                    requirementTypes['其他'].push(trimmedLine);
+                }
+            }
+            
+            // 生成格式化的要求文本
+            let formatted = '';
+            for (const [type, items] of Object.entries(requirementTypes)) {
+                if (items.length > 0) {
+                    formatted += `${type}要求：\n`;
+                    for (let i = 0; i < items.length; i++) {
+                        formatted += `${i + 1}. ${items[i]}\n`;
+                    }
+                    formatted += '\n';
+                }
+            }
+            
+            return formatted.trim();
+        }
+        
+        // 构建提示词
+        function buildPrompt(content, params, customRequirements) {
+            const { genre, episodes, duration } = params;
+            
+            // 根据集数生成不同的提示词
+            let episodePrompt = '';
+            if (episodes === 1) {
+                episodePrompt = `一集${duration}分钟的`;
+            } else {
+                episodePrompt = `${episodes}集，每集${duration}分钟的连续`;
+            }
+            
+            // 解析个性化要求
+            const parsedRequirements = parseCustomRequirements(customRequirements);
+            
+            // 基础提示词
+            let prompt = `你是一名专业的微短剧编剧，擅长将网络文学改编为符合市场需求的高质量微短剧剧本。请将以下网络文学内容改编为${episodePrompt}${genre}题材微短剧剧本，遵循以下要求：
+
+1. 剧本格式规范：
+   - 每集剧本包含：集数、标题、时长、场号、场景、时间、人物、动作、台词、镜头角度建议等元素
+   - 多集剧本请清晰分隔每集内容
+   - 严格按照集数要求生成
+
+2. 内容丰富度要求：
+   - 严格基于提供的网络文学内容，深入挖掘核心情节和人物关系
+   - 增强视觉表现力，适合镜头语言呈现，添加细腻的场景描写
+   - 丰富人物动作、表情和心理活动描写
+   - 增加环境细节、氛围营造和道具描写
+   - 对话要符合人物性格，自然流畅，富有情感
+   - 每集包含2-3个冲突点，情节丰富紧凑
+   - 开场30秒设置强钩子，吸引观众注意力
+   - 每集结尾设置悬念，吸引观众继续观看下一集
+   - 多集剧本需保持情节连贯性和逻辑性
+   - 适当添加背景音乐和音效建议
+
+3. 细腻度要求：
+   - 人物描写：详细刻画人物的外貌、穿着、动作、表情、心理活动
+   - 场景描写：详细描述场景的环境、氛围、光线、道具等
+   - 动作描写：详细描述人物的动作细节，包括手势、姿态、步伐等
+   - 情感描写：深入刻画人物的情感变化和内心活动
+   - 对话描写：对话要自然流畅，符合人物性格，富有情感和冲突
+
+4. 时长控制：
+   - 严格控制每集内容长度，确保适合${duration}分钟的拍摄时长
+   - 对话和动作设计要符合时长要求
+   - 根据时长合理安排场景数量和节奏
+
+`;
+            
+            // 添加用户的个性化要求
+            if (parsedRequirements) {
+                prompt += `5. 用户个性化要求：\n   请严格遵循以下用户对剧本的个性化要求，这些要求是剧本改编的重要指导方向：\n${parsedRequirements}\n\n`;
+            }
+            
+            // 添加网络文学内容
+            prompt += `网络文学内容：
+${content}
+
+请输出标准的微短剧剧本格式，内容要丰富细腻，充满细节描写，不要添加其他说明。`;
+            
+            return prompt;
+        }
+        
+        // 调用硅基流动API
+        async function callSiliconFlowAPI(apiKey, prompt, temperature = 0.7, maxTokens = 3000) {
+            // 添加网络连接测试
+            if (!navigator.onLine) {
+                throw new Error('网络连接失败，请检查您的网络设置');
+            }
+            
+            // 确保apiKey是字符串
+            if (typeof apiKey !== 'string') {
+                apiKey = String(apiKey || '');
+            }
+            
+            // 检查API密钥格式
+            if (!apiKey || apiKey.trim() === '') {
+                throw new Error('API密钥不能为空');
+            }
+            
+            // 支持的模型列表，使用硅基流动API官方支持的完整模型名称
+            // 从搜索结果中确认的正确模型名称
+            const supportedModels = [
+                'Qwen/QwQ-32B',         // 确认支持的Qwen模型
+                'Qwen/Qwen3-8B',        // 确认支持的Qwen3模型
+                'deepseek-ai/deepseek-chat'  // DeepSeek模型
+            ];
+            
+            // 替代API端点列表，从搜索结果中获取
+            const apiEndpoints = [
+                'https://api.siliconflow.cn/v1/chat/completions',  // 硅基流动官方API
+                'https://api.302.ai/v1/chat/completions'         // 302.AI API（支持硅基流动模型）
+            ];
+            
+            let allErrors = [];
+            
+            // 依次尝试每个API端点
+            for (let endpointIndex = 0; endpointIndex < apiEndpoints.length; endpointIndex++) {
+                const url = apiEndpoints[endpointIndex];
+                console.log(`\n=== 开始尝试API端点 ${endpointIndex+1}/${apiEndpoints.length}: ${url} ===`);
+                
+                // 依次尝试每个模型
+                for (let modelIndex = 0; modelIndex < supportedModels.length; modelIndex++) {
+                    const model = supportedModels[modelIndex];
+                    console.log(`\n--- 开始尝试模型 ${modelIndex+1}/${supportedModels.length}: ${model} ---`);
+                    
+                    // 构建请求头
+                    const headers = {
+                        'Authorization': `Bearer ${apiKey.trim()}`,
+                        'Content-Type': 'application/json'
+                    };
+                    
+                    // 构建简单的请求体，只包含必要字段
+                    const requestBody = {
+                        model: model,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ],
+                        temperature: temperature,
+                        max_tokens: maxTokens
+                    };
+                    
+                    // 使用AbortController实现超时
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => {
+                        console.log(`模型 ${model} 请求超时，正在中止...`);
+                        controller.abort();
+                    }, 60000);
+                    
+                    try {
+                        // 发送API请求
+                        console.log(`发送请求到: ${url}`);
+                        console.log(`请求头:`, headers);
+                        console.log(`请求体:`, requestBody);
+                        
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: headers,
+                            body: JSON.stringify(requestBody),
+                            signal: controller.signal,
+                            mode: 'cors',
+                            credentials: 'omit'
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        console.log(`响应状态:`, response.status, response.statusText);
+                        
+                        // 读取响应文本
+                        const responseText = await response.text();
+                        console.log(`响应文本:`, responseText);
+                        
+                        // 解析响应
+                        let result;
+                        try {
+                            result = JSON.parse(responseText);
+                            console.log(`解析后的响应:`, result);
+                        } catch (jsonError) {
+                            const errorMsg = `JSON解析错误: ${jsonError.message}`;
+                            console.error(errorMsg);
+                            allErrors.push(`${url} - ${model}: ${errorMsg}`);
+                            continue;
+                        }
+                        
+                        // 处理错误响应
+                        if (!response.ok) {
+                            const errorObj = result.error || {};
+                            const errorMsg = `API错误 (${response.status}): ${errorObj.message || '未知错误'}，错误码: ${errorObj.code || '无'}`;
+                            console.error(errorMsg);
+                            allErrors.push(`${url} - ${model}: ${errorMsg}`);
+                            continue;
+                        }
+                        
+                        // 检查响应格式
+                        if (!result.choices || !Array.isArray(result.choices) || result.choices.length === 0) {
+                            const errorMsg = `响应格式错误，缺少choices数组`;
+                            console.error(errorMsg);
+                            allErrors.push(`${url} - ${model}: ${errorMsg}`);
+                            continue;
+                        }
+                        
+                        const choice = result.choices[0];
+                        if (!choice || !choice.message || !choice.message.content) {
+                            const errorMsg = `响应格式错误，缺少必要的content字段`;
+                            console.error(errorMsg);
+                            allErrors.push(`${url} - ${model}: ${errorMsg}`);
+                            continue;
+                        }
+                        
+                        console.log(`模型 ${model} 调用成功！`);
+                        return String(choice.message.content);
+                    } catch (error) {
+                        clearTimeout(timeoutId);
+                        
+                        let errorMsg = `${error.name}: ${error.message}`;
+                        console.error(errorMsg);
+                        console.error(`错误堆栈:`, error.stack);
+                        allErrors.push(`${url} - ${model}: ${errorMsg}`);
+                        
+                        // 处理网络错误
+                        if (error.name === 'TypeError' && error.message.indexOf('failed to fetch') !== -1) {
+                            continue;
+                        }
+                        
+                        // 处理超时错误
+                        if (error.name === 'AbortError') {
+                            continue;
+                        }
+                        
+                        // 处理CORS错误
+                        if (error.name === 'TypeError' && error.message.indexOf('CORS') !== -1) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            
+            // 所有模型和API端点都失败，抛出详细错误信息
+            const detailedError = `所有API调用均失败，请检查以下问题：\n\n1. 网络连接问题：确保您可以访问API端点\n2. API密钥问题：检查API密钥是否正确，确保没有多余的空格或字符\n3. 模型权限问题：确保您的API密钥有权限访问这些模型\n4. 配额问题：检查您的API配额是否已用完\n5. 服务状态：检查硅基流动API服务是否正常\n\n已尝试的API端点：\n${apiEndpoints.join('\n')}\n\n已尝试的模型：\n${supportedModels.join('\n')}\n\n详细错误日志：\n${allErrors.join('\n')}`;
+            
+            console.error(detailedError);
+            throw new Error(detailedError);
+        }
+
+        // 基于用户输入生成相关剧本
+        function generateExampleScript(params) {
+            const { genre, episodes, duration } = params;
+            const userContent = novelContent.value.trim();
+            
+            // 从用户输入中提取关键信息
+            const keyInfo = extractKeyInfo(userContent);
+            
+            // 获取用户的个性化要求
+            const customRequirements = document.getElementById('custom-requirements').value.trim();
+            
+            // 生成更贴近用户输入的剧本
+            return generateRelevantScript(keyInfo, params, customRequirements);
+        }
+        
+        // 生成更贴近用户输入的剧本
+        function generateRelevantScript(keyInfo, params, customRequirements) {
+            const { genre, episodes, duration } = params;
+            
+            // 解析个性化要求
+            const parsedRequirements = parseCustomRequirements(customRequirements);
+            
+            // 根据个性化要求调整剧本生成参数
+            let enhancedEmotion = false;
+            let enhancedSuspense = false;
+            let enhancedDetails = false;
+            let customTheme = '';
+            
+            // 检查个性化要求中的关键词
+            if (parsedRequirements) {
+                const lowerReq = parsedRequirements.toLowerCase();
+                enhancedEmotion = lowerReq.indexOf('情感') !== -1 || lowerReq.indexOf('感情') !== -1;
+                enhancedSuspense = lowerReq.indexOf('悬念') !== -1 || lowerReq.indexOf('反转') !== -1;
+                enhancedDetails = lowerReq.indexOf('细节') !== -1 || lowerReq.indexOf('细腻') !== -1;
+                
+                // 提取主题要求
+                if (lowerReq.indexOf('主题') !== -1) {
+                    const themeMatch = parsedRequirements.match(/主题要求：[\s\S]*?(?=\n\s*\n|$)/);
+                    if (themeMatch) {
+                        customTheme = themeMatch[0].replace('主题要求：', '').trim();
+                    }
+                }
+            }
+            
+            let script = '';
+            
+            // 添加个性化要求说明（如果有）
+            if (parsedRequirements) {
+                script += `【个性化要求说明】
+${parsedRequirements}
+
+`;
+            }
+            
+            // 生成指定集数的剧本
+            for (let i = 1; i <= episodes; i++) {
+                // 根据集数调整剧情发展
+                let episodeAction = keyInfo.action;
+                let episodeDialogue = keyInfo.dialogue;
+                let episodeAction2 = keyInfo.action2;
+                let episodeDialogue2 = keyInfo.dialogue2;
+                let episodeAction3 = keyInfo.action3;
+                let episodeDialogue3 = keyInfo.dialogue3;
+                let episodeAction4 = keyInfo.action4;
+                let episodeDialogue4 = keyInfo.dialogue4;
+                let episodePreview = keyInfo.preview;
+                
+                // 根据集数调整剧情
+                if (episodes > 1) {
+                    if (i === 1) {
+                        episodeAction = `${keyInfo.action}（第一集开场，阳光透过玻璃窗洒在街道上，行人匆忙走过）`;
+                        episodePreview = `第2集预告：${keyInfo.preview}...`;
+                    } else if (i === episodes) {
+                        episodeAction = `${keyInfo.action}（第${i}集开场，最终集，城市的霓虹灯在夜幕中闪烁）`;
+                        episodePreview = `全剧终 - 感谢观看`;
+                    } else {
+                        episodeAction = `${keyInfo.action}（第${i}集开场，微风轻轻吹过，树叶沙沙作响）`;
+                        episodePreview = `第${i+1}集预告：${keyInfo.preview}...`;
+                    }
+                }
+                
+                // 增强悬念（如果用户要求）
+                if (enhancedSuspense) {
+                    episodePreview = `第${i+1}集预告：${keyInfo.preview}...一个隐藏已久的秘密即将被揭开！`;
+                }
+                
+                // 为每个场景添加更丰富的细节描写
+                const sceneDetails = {
+                    setting1: `${keyInfo.setting}（环境描写：整洁的街道，两侧是现代风格的建筑，远处传来汽车鸣笛声，空气中弥漫着咖啡的香气）`,
+                    setting2: `${keyInfo.setting2}（环境描写：温馨的咖啡馆，暖黄色的灯光，轻柔的爵士乐，桌上摆放着新鲜的鲜花）`,
+                    setting3: `${keyInfo.setting3}（环境描写：现代化的办公室，落地窗外可以看到城市的天际线，员工们忙碌地工作）`,
+                    setting4: `${keyInfo.setting4}（环境描写：温馨的公寓，柔和的灯光，书架上摆满了书籍，窗台上摆放着绿色植物）`
+                };
+                
+                // 生成单集剧本，添加更丰富的细节
+                script += `【集数】第${i}集
+【标题】${keyInfo.title} - 第${i}集
+【题材】${genre}
+${customTheme ? `【主题要求】${customTheme}
+` : ''}【时长】${duration}分钟
+【建议背景音乐】${i === 1 ? '轻快的钢琴旋律' : i === episodes ? '深情的弦乐' : '节奏感强的电子音乐'}
+
+【场号】1
+【场景】${sceneDetails.setting1}
+【时间】${keyInfo.time}（光线：${keyInfo.time.includes('早上') ? '明亮的阳光' : keyInfo.time.includes('晚上') ? '柔和的月光' : '温暖的自然光'}）
+【人物】${keyInfo.characters}（${keyInfo.characters.includes('林晓') ? '林晓：穿着简约的职业装，背着黑色的公文包，头发整齐地扎成马尾' : '主角：穿着时尚的休闲装，步履匆匆，表情略显疲惫'}）
+
+【动作】${episodeAction}（细节描写：她不时低头看表，眉头微皱，脚步加快，手中的文件被风吹得微微作响，高跟鞋敲击地面的声音清脆有力${enhancedDetails ? '，额头上渗出细密的汗珠，眼神中流露出一丝焦虑' : ''}）
+${episodeDialogue}（语气：主角语气急促，略带歉意；配角语气温和，带着一丝惊讶${enhancedEmotion ? '，眼中闪过一丝不易察觉的光芒' : ''}）
+
+【场号】2
+【场景】${sceneDetails.setting2}
+【时间】${keyInfo.time2}（光线：暖黄色的灯光，营造出温馨的氛围）
+【人物】${keyInfo.characters}（${keyInfo.characters.includes('陈阳') ? '陈阳：穿着笔挺的西装，手腕上戴着昂贵的手表，表情平静而自信' : '配角：穿着得体的休闲装，眼神中带着一丝期待'}）
+
+【动作】${episodeAction2}（细节描写：她搅动咖啡的动作有些生硬，眼神不时飘向窗外，手指紧张地摩挲着咖啡杯的边缘；他则专注地看着她，嘴角带着淡淡的微笑${enhancedDetails ? '，手指轻轻敲打着桌面，节奏与背景音乐同步' : ''}）
+${episodeDialogue2}（语气：主角语气尴尬，略显紧张；配角语气轻松，带着一丝调侃${enhancedEmotion ? '，眼神中充满了温柔' : ''}）
+
+【场号】3
+【场景】${sceneDetails.setting3}
+【时间】${keyInfo.time3}（光线：明亮的自然光，从落地窗洒入，照亮了整个办公室）
+【人物】${keyInfo.characters}（${keyInfo.characters.includes('林晓') ? '林晓：坐在办公桌前，面前堆着厚厚的文件，电脑屏幕上显示着设计稿；同事：穿着休闲的工作装，手中拿着一杯咖啡，表情关切' : '主角：坐在电脑前，手指快速地敲击着键盘，眉头紧锁；同事：站在旁边，手中拿着文件，表情严肃'}）
+
+【动作】${episodeAction3}（细节描写：她的手指在键盘上快速敲击，偶尔停下来揉一揉太阳穴，眼神中流露出疲惫；同事轻轻敲了敲她的桌面，递过一杯咖啡，眼神中带着关切${enhancedEmotion ? '，轻轻拍了拍她的肩膀，传递着无声的鼓励' : ''}）
+${episodeDialogue3}（语气：同事语气关切；主角语气疲惫，带着一丝无奈${enhancedDetails ? '，声音中带着一丝沙哑，显然已经工作了很久' : ''}）
+
+【场号】4
+【场景】${sceneDetails.setting4}
+【时间】${keyInfo.time4}（光线：柔和的台灯灯光，营造出温馨的氛围）
+【人物】${keyInfo.characters}（${keyInfo.characters.includes('林晓') ? '林晓：穿着舒适的家居服，坐在沙发上，手中拿着手机，表情犹豫；手机屏幕：显示着陈阳的电话号码' : '主角：穿着宽松的睡衣，站在窗前，看着窗外的夜景，表情若有所思；手机：放在茶几上，屏幕突然亮起'}）
+
+【动作】${episodeAction4}（细节描写：她的手指在手机屏幕上停留了很久，最终还是按下了通话键；电话铃声响起，她深吸一口气，接通了电话，声音有些颤抖${enhancedDetails ? '，另一只手紧紧攥着沙发靠垫，指节微微发白' : ''}）
+${episodeDialogue4}（语气：主角语气紧张，略带期待；配角语气温和，带着一丝真诚${enhancedEmotion ? '，声音中充满了温暖与关切' : ''}）
+
+【黑屏】
+【字幕】${enhancedSuspense ? episodePreview + ' 一个意想不到的秘密即将被揭开...' : episodePreview}
+【建议音效】${i === episodes ? '悠扬的片尾曲' : enhancedSuspense ? '紧张的音效，预示着重大反转' : '紧张的音效，预示着下一集的悬念'}
+
+`;
+            }
+            
+            // 添加剧终标记
+            script += `【剧终】
+【制作信息】微短剧剧本生成器出品 | 基于网络文学改编 | 版权所有
+`;
+            
+            return script;
+        }
+        
+        // 从用户输入中提取关键信息（增强版）
+        function extractKeyInfo(content) {
+            // 确保content是字符串
+            if (typeof content !== 'string') {
+                content = String(content || '');
+            }
+            
+            // 如果内容为空，使用默认值
+            if (!content || content.trim() === '') {
+                return {
+                    title: "命运的邂逅",
+                    setting: "都市街头/咖啡店外",
+                    time: "上午10点",
+                    characters: "主角（28岁，职场人士）、配角（30岁，成功人士）",
+                    action: "主角抱着文件急匆匆地走在街头，高跟鞋敲打着地面，不时看一眼手腕上的表。她转过街角，与迎面而来的配角相撞。文件散落一地，配角的手机也掉在了地上。",
+                    dialogue: `【主角】（慌乱地蹲下捡文件，道歉）对不起！对不起！我赶时间，没看路...\n【配角】（弯腰捡手机，抬头看向主角）没关系...（停顿，认出对方）是你？`,
+                    setting2: "XX咖啡馆",
+                    time2: "上午10:30",
+                    action2: "两人坐在咖啡馆靠窗的位置，主角搅动着面前的拿铁，眼神有些闪躲。配角则专注地看着她，嘴角带着一丝微笑。",
+                    dialogue2: `【配角】没想到会在这里遇见你。你还是像以前一样，总是那么匆忙。\n【主角】（尴尬地笑了笑）习惯了，工作总是很忙。（转移话题）你...现在怎么样？`,
+                    setting3: "主角的公司",
+                    time3: "下午2:00",
+                    action3: "主角回到公司，坐在工位上，思绪万千。她拿起手机，翻出配角的联系方式，犹豫了很久，最终还是没有拨通。",
+                    dialogue3: `【主角】（自言自语）今天的相遇真的是巧合吗？`,
+                    setting4: "主角的公寓",
+                    time4: "晚上8:00",
+                    action4: "主角站在窗前，看着窗外的夜景，陷入了沉思。突然，手机收到一条新消息，是配角发来的。",
+                    dialogue4: `【手机提示音】（特写：手机屏幕显示）"今天很高兴遇见你，改天一起吃饭好吗？"\n【主角】（看着手机，嘴角微微上扬）...`,
+                    preview: "主角和配角的再次相遇，会擦出怎样的火花？隐藏在背后的秘密又是什么？"
+                };
+            }
+            
+            // 增强的关键词提取和信息生成
+            let title = "未知标题";
+            let setting = "都市街头";
+            let time = "白天";
+            let characters = "主角、配角";
+            let action = "主角正在忙碌地走着";
+            let dialogue = `【主角】你好！\n【配角】你好！`;
+            let setting2 = "室内场景";
+            let time2 = "下午";
+            let action2 = "两人开始交谈";
+            let dialogue2 = `【主角】今天真巧啊！\n【配角】是啊，好久不见！`;
+            let setting3 = "主角的工作场所";
+            let time3 = "下午";
+            let action3 = "主角回到工作中";
+            let dialogue3 = `【主角】（自言自语）今天的相遇会改变什么吗？`;
+            let setting4 = "主角的家";
+            let time4 = "晚上";
+            let action4 = "主角独自思考";
+            let dialogue4 = `【主角】（看着手机）...`;
+            let preview = "主角和配角的故事刚刚开始，更多精彩内容敬请期待...";
+            
+            // 提取人物信息（增强版）
+            if (content.indexOf("林晓") !== -1) {
+                characters = "林晓（28岁，设计师）、陈阳（30岁，CEO）";
+            } else if (content.indexOf("主角") !== -1) {
+                characters = "主角（28岁，职场人士）、配角（30岁，成功人士）";
+            } else {
+                // 从内容中提取可能的人物
+                characters = extractPotentialCharacters(content);
+            }
+            
+            // 提取场景信息（增强版）
+            if (content.indexOf("公司") !== -1 || content.indexOf("办公室") !== -1) {
+                setting = "XX公司办公室";
+                setting2 = "公司会议室";
+                setting3 = "公司茶水间";
+                setting4 = "主角的公寓";
+            } else if (content.indexOf("咖啡馆") !== -1 || content.indexOf("咖啡厅") !== -1) {
+                setting = "都市街头/咖啡店外";
+                setting2 = "XX咖啡馆";
+                setting3 = "咖啡馆露台";
+                setting4 = "主角的家";
+            } else if (content.indexOf("学校") !== -1 || content.indexOf("大学") !== -1) {
+                setting = "大学校园/图书馆外";
+                setting2 = "大学图书馆";
+                setting3 = "校园咖啡厅";
+                setting4 = "学生宿舍";
+            } else if (content.indexOf("家") !== -1 || content.indexOf("公寓") !== -1) {
+                setting = "主角的公寓楼下";
+                setting2 = "主角的公寓";
+                setting3 = "公寓客厅";
+                setting4 = "公寓阳台";
+            } else {
+                setting = "都市街头";
+                setting2 = "XX餐厅";
+                setting3 = "餐厅包间";
+                setting4 = "主角的家";
+            }
+            
+            // 提取时间信息
+            if (content.indexOf("早上") !== -1 || content.indexOf("清晨") !== -1) {
+                time = "清晨";
+                time2 = "上午";
+                time3 = "中午";
+                time4 = "晚上";
+            } else if (content.indexOf("晚上") !== -1 || content.indexOf("夜晚") !== -1) {
+                time = "傍晚";
+                time2 = "晚上";
+                time3 = "深夜";
+                time4 = "深夜";
+            } else {
+                time = "上午10点";
+                time2 = "上午11点";
+                time3 = "下午2点";
+                time4 = "晚上8点";
+            }
+            
+            // 提取情节信息（增强版）
+            if (content.indexOf("碰撞") !== -1 || content.indexOf("相撞") !== -1) {
+                action = "主角抱着文件急匆匆地走在街头，不小心撞到了正在打电话的配角。文件散落一地，配角的手机也掉在了地上。";
+                dialogue = `【主角】（慌乱地蹲下捡文件，道歉）对不起！对不起！我赶时间，没看路...\n【配角】（弯腰捡手机，抬头看向主角）没关系...（停顿，认出对方）你是...？`;
+                action2 = "两人坐在附近的咖啡厅里，主角搅动着面前的饮品，眼神有些闪躲。配角则专注地看着主角。";
+                dialogue2 = `【配角】没想到会在这里遇见你。你还是像以前一样，总是那么匆忙。\n【主角】（尴尬地笑了笑）习惯了，工作总是很忙。`;
+            } else if (content.indexOf("相遇") !== -1 || content.indexOf("重逢") !== -1) {
+                action = "主角在街头偶遇了多年未见的配角，两人都愣了一下。";
+                dialogue = `【主角】（惊讶）好久不见！\n【配角】（微笑）是啊，好久不见了！没想到会在这里遇到你。`;
+                action2 = "两人找了一家咖啡厅坐下，回忆起过去的时光。";
+                dialogue2 = `【主角】这些年你过得怎么样？\n【配角】还不错，你呢？`;
+            } else if (content.indexOf("工作") !== -1 || content.indexOf("职场") !== -1) {
+                action = "主角正在办公室里忙碌地工作，突然接到通知说有重要客户来访。";
+                dialogue = `【同事】林总，有位重要客户已经到了会议室，正在等您。\n【主角】好的，我马上过去。`;
+                action2 = "主角走进会议室，惊讶地发现来访的客户竟然是自己的旧识。";
+                dialogue2 = `【主角】（惊讶）陈总？怎么是你？\n【配角】（微笑）没想到吧？我就是你们公司的新客户。`;
+            } else if (content.indexOf("爱情") !== -1 || content.indexOf("喜欢") !== -1) {
+                action = "主角正在咖啡厅里看书，突然有人坐在了对面。抬头一看，是自己暗恋已久的人。";
+                dialogue = `【配角】可以坐在这里吗？\n【主角】（紧张）当...当然可以。`;
+                action2 = "两人开始交谈，气氛有些尴尬但又带着一丝暧昧。";
+                dialogue2 = `【配角】你也喜欢这本书吗？\n【主角】（点头）嗯，我很喜欢作者的文笔。`;
+            } else {
+                // 通用剧情
+                action = "主角正在街头走着，突然注意到了一个熟悉的身影。";
+                dialogue = `【主角】（轻声自语）那不是...？\n【配角】（转身，惊讶）是你？`;
+                action2 = "两人走到附近的长椅上坐下，开始交谈。";
+                dialogue2 = `【主角】好久不见，最近怎么样？\n【配角】还不错，你呢？`;
+            }
+            
+            // 生成更丰富的后续剧情
+            action3 = "主角回到工作场所，却无法集中精力，脑海里不断浮现刚才的相遇。";
+            dialogue3 = `【同事】林晓，你怎么了？最近总是心不在焉的。\n【主角】（回过神）哦，没什么，只是有点累了。`;
+            action4 = "主角回到家，坐在沙发上，拿出手机，犹豫着是否要联系配角。就在这时，手机突然响了。";
+            dialogue4 = `【手机铃声】\n【主角】（看手机，惊讶）是他/她...\n【配角】（电话）喂，是我。今天遇见你很高兴，改天有空一起吃饭吗？`;
+            
+            // 生成标题（增强版）
+            if (content.indexOf("爱情") !== -1 || content.indexOf("喜欢") !== -1) {
+                title = "爱的邂逅";
+                preview = "主角和配角的爱情故事正式开始，他们能否克服种种困难走到一起？";
+            } else if (content.indexOf("职场") !== -1 || content.indexOf("工作") !== -1) {
+                title = "职场奇遇";
+                preview = "主角在工作中遇到了怎样的挑战？与旧识的重逢又会带来什么变化？";
+            } else if (content.indexOf("秘密") !== -1 || content.indexOf("隐藏") !== -1) {
+                title = "隐藏的真相";
+                preview = "隐藏在背后的秘密即将揭晓，主角的命运会因此改变吗？";
+            } else if (content.indexOf("重逢") !== -1 || content.indexOf("相遇") !== -1) {
+                title = "命运的重逢";
+                preview = "多年后的重逢，是巧合还是命中注定？他们的故事将如何发展？";
+            } else {
+                // 从内容中提取关键词生成标题
+                title = generateTitleFromContent(content);
+                preview = "主角的故事刚刚开始，更多精彩内容敬请期待...";
+            }
+            
+            return {
+                title, setting, time, characters,
+                action, dialogue,
+                setting2, time2, action2, dialogue2,
+                setting3, time3, action3, dialogue3,
+                setting4, time4, action4, dialogue4,
+                preview
+            };
+        }
+        
+        // 从内容中提取潜在人物
+        function extractPotentialCharacters(content) {
+            // 简单的人物提取逻辑，实际项目中可以使用NLP技术
+            const namePattern = /[\u4e00-\u9fa5]{2,4}(?=（|\(| |：|:)/g;
+            const matches = content.match(namePattern);
+            if (matches && matches.length > 0) {
+                // 去重并添加角色信息
+                const uniqueNames = [...new Set(matches)];
+                if (uniqueNames.length >= 2) {
+                    return `${uniqueNames[0]}（28岁，职场人士）、${uniqueNames[1]}（30岁，成功人士）`;
+                } else if (uniqueNames.length === 1) {
+                    return `${uniqueNames[0]}（28岁，主角）、配角（30岁，重要人物）`;
+                }
+            }
+            return "主角（28岁，职场人士）、配角（30岁，成功人士）";
+        }
+        
+        // 从内容中提取关键词生成标题
+        function generateTitleFromContent(content) {
+            // 简单的标题生成逻辑
+            if (content.indexOf("公司") !== -1 || content.indexOf("办公室") !== -1) {
+                return "职场相遇";
+            } else if (content.indexOf("学校") !== -1 || content.indexOf("大学") !== -1) {
+                return "校园邂逅";
+            } else if (content.indexOf("咖啡馆") !== -1 || content.indexOf("咖啡厅") !== -1) {
+                return "咖啡情缘";
+            } else if (content.indexOf("家") !== -1 || content.indexOf("公寓") !== -1) {
+                return "家中偶遇";
+            } else {
+                return "命运的相遇";
+            }
+        }
+
+        // 下载剧本
+        function downloadScript(format) {
+            if (!generatedScript) {
+                alert('请先生成剧本！');
+                return;
+            }
+
+            const filename = `微短剧剧本_${new Date().getTime()}.${format === 'txt' ? 'txt' : format === 'docx' ? 'docx' : 'pdf'}`;
+            
+            if (format === 'txt') {
+                // 纯文本下载
+                const blob = new Blob([generatedScript], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                // 其他格式下载（实际项目中会调用后端API）
+                alert(`正在生成${format.toUpperCase()}格式文件，请稍候...`);
+                // 这里可以添加实际的API调用逻辑
+            }
+        }
+
+        // 下载按钮事件
+        downloadTxtBtn.onclick = () => downloadScript('txt');
+        downloadWordBtn.onclick = () => downloadScript('docx');
+        downloadPdfBtn.onclick = () => downloadScript('pdf');
+
+        // 页面加载时检查API密钥
+        window.onload = function() {
+            const savedApiKey = localStorage.getItem('siliconFlowApiKey');
+            if (!savedApiKey) {
+                // 首次使用，打开API密钥设置
+                openApiKeyModal();
+            }
+        };
+    </script>
+</body>
+</html>

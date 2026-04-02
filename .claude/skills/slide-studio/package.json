@@ -1,0 +1,16 @@
+{
+  "name": "slide-studio",
+  "version": "1.0.0",
+  "description": "Create and modify PowerPoint presentations through direct XML manipulation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["pptx", "powerpoint", "presentation", "ooxml"],
+  "author": "trkbt10",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}
